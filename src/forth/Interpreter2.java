@@ -124,8 +124,8 @@ public class Interpreter2 {
                 System.getProperty("user.dir") + "/src/forth/start.f"))){
 
             System.out.println("Startup file found");
-            exec(scan);;
-        } catch (FileNotFoundException e) {}
+            exec(scan);
+        } catch (FileNotFoundException ignored) {}
 
         exec(new Scanner(System.in));
     }
@@ -163,9 +163,7 @@ public class Interpreter2 {
                         }
                         case "seemem" -> show_mem();
                         case "seerawmem" -> System.out.println(memory);
-                        case "stringliteral" -> {
-                            write_string(scan.next(), memory.size());
-                        }
+                        case "stringliteral" -> write_string(scan.next(), memory.size());
                         case "read-string" -> System.out.println(read_string(stack.pop()));
                         case "literal" -> {
                             call_stack.add(call_stack.pop() + 1);
@@ -190,10 +188,8 @@ public class Interpreter2 {
                         case "xor" -> stack.add(stack.pop() ^ stack.pop());
                         case "swap" -> {int p = stack.pop(); stack.add(stack.size()-1, p);}
                         case "dup" -> stack.add(stack.last());
-                        case "branch" -> {
-                            //advance pointer by instruction at current pointer position
-                            call_stack.set(call_stack.size()-1, call_stack.last() + memory.get(call_stack.last() + 1));
-                        }
+                        case "branch" -> //advance pointer by instruction at current pointer position
+                                call_stack.set(call_stack.size()-1, call_stack.last() + memory.get(call_stack.last() + 1));
                         case "branch?" -> {
                             //System.out.println(" branching "+stack.last()+" off "+ memory.get(call_stack.last() + 1));
                             //IF stack top is nonzero
@@ -245,10 +241,6 @@ public class Interpreter2 {
 
             //advance
             int next_stack_frame = call_stack.pop() + 1;
-            int address_to_be_exec = memory.get(next_stack_frame);
-            //System.out.println(" addr to be exec "+address_to_be_exec);
-            boolean is_immediate = memory.get(address_to_be_exec + memory.get(address_to_be_exec)) == 1;
-
             call_stack.add(next_stack_frame);
 
         }
