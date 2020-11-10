@@ -1,4 +1,4 @@
-: double push1 print ;
+: double [lit] 2 print ;
 
 : [compile] word stack>mem ; immediate
 

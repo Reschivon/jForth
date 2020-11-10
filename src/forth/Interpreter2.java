@@ -8,20 +8,17 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Interpreter2 {
-    //word def
-    /*
-    to_prev word_len+1 char... immediate? op...
-            ^
-     */
     public static boolean DEBUG = false;
     private static final String setPlainText = "\033[0;0m";
     private static final String setBoldText = "\033[0;1m";
-    static boolean immediate = true;
 
-    static Stack<Integer> memory = new Stack<>();
+    static boolean immediate = true;
+    //address of first pointer in the linked list that comprises the dictionary
     static int HERE = -1;
+    //Address of initial opcode, or main() for c programmers. Input is written to here
     static int ENTRY_POINT = -1;
 
+    static Stack<Integer> memory = new Stack<>();
     static Stack<Integer> stack = new Stack<>();
     static Stack<Integer> call_stack = new Stack<>();
 
@@ -54,18 +51,6 @@ public class Interpreter2 {
         return -1;
     }
 
-    static void print(){
-        System.out.println(stack.last());
-        stack.pop();
-    }
-
-    static void push1(){
-        stack.add(1);
-    }
-    static void stackToMem(){
-        memory.add(stack.last());
-        stack.pop();
-    }
 
     static void declarePrimitive(String name){
         declarePrimitive(name, false);
@@ -84,7 +69,6 @@ public class Interpreter2 {
         declarePrimitive("seemem");
         declarePrimitive("seerawmem");
         declarePrimitive("memposition");
-        declarePrimitive("push1");
         declarePrimitive("print");
         declarePrimitive("return", true);
         declarePrimitive("immediate");
@@ -136,14 +120,13 @@ public class Interpreter2 {
         memory.add(search_word("donothing"));
         memory.add(search_word("return"));
 
-        File f = new File(System.getProperty("user.dir") + "/src/forth/start.f");
-        if(!f.exists()) return;
-        System.out.println("Startup file " + f.getName() + " found");
-        Scanner scan = null;
-        try { scan = new Scanner(f);
+        try (Scanner scan = new Scanner(new File(
+                System.getProperty("user.dir") + "/src/forth/start.f"))){
+
+            System.out.println("Startup file found");
+            exec(scan);;
         } catch (FileNotFoundException e) {}
 
-        exec(scan);
         exec(new Scanner(System.in));
     }
 
@@ -163,15 +146,14 @@ public class Interpreter2 {
                     if(DEBUG)System.out.print(" r::" + read_string(word_address));
                     switch (primitive_words.get(word_address)) {
                         case "donothing" -> System.out.print("");
-                        case "push1" -> push1();
-                        case "print" -> print();
+                        case "print" -> System.out.println(stack.pop());
                         case "return" -> call_stack.remove(call_stack.size() - 1);
                         case "word" -> stack.add(search_word(scan.next()));
 //                        case "token>stack" -> {
 //                            memory.add(search_word("literal"));
 //                            memory.add(search_word(scan.next()));
 //                        }
-                        case "stack>mem" -> stackToMem();
+                        case "stack>mem" -> memory.add(stack.pop());
                         case "[" -> immediate = true;
                         case "]" -> immediate = false;
                         case "immediate" -> set_immediate();
@@ -366,5 +348,15 @@ public class Interpreter2 {
         }
 
         System.out.println();
+    }
+
+    public static class Stack <E> extends ArrayList<E> {
+        public E pop(){
+            return remove(size()-1);
+        }
+
+        public E last(){
+            return get(size()-1);
+        }
     }
 }
