@@ -4,6 +4,7 @@ A Forth implementation in Java that sticks to the elegance of a bare metal Forth
 Also useful as a reference for programmers from higher-level languages learning the in & outs of the Forth interpreter. (If you are brand-new to Forth, [read up](http://galileo.phys.virginia.edu/classes/551.jvn.fall01/primer.htm) on the syntax before getting into the implementation)
 
 Code is by no means pretty. It still has a bunch of rough spots. No comments yet. The primitives can be further reduced
+Todo: make linked list dictionary traversal work with here
 
 ## Motivation
 The need to speed up the development process of FIRST Tech Challenge robotics code. Deploying a single edit requires 20s of build time, manual download thru a cable, repositioning the robot, and restarting the OpMode. 
@@ -17,29 +18,32 @@ To interoperate with the robot's Java code this interpreter must be written in J
 ### Interpreter Info
 To imitate the "genuine" experience of making a Forth on bare metal (which is where its elegance really shines) I've forgone the fancy data structures/libraries of Java.
 Because mostly high-level control code will be written in Forth, it's OK to sacrifice speed for elegance. The compute-intensive portions are in Java and C++
+I have a HashMap serving as lookup table for primitive Java words; this is the only advanced-ish Java library I use.
 
 The memory is one big integer array -- strings are stored here as Unicode characters, not String objects.
-I have a HashMap serving as lookup table for primitive Java words; this is the only advanced-ish Java library I use.
 
 Here is the structure of one word in memory
 
     +-------------------+-----------+----------------- - - - - +------------+------------- - - - -
     | POINTER TO        | LENGTH OF | NAME CHARACTERS          | IMMEDIATE? | ADDRESSES OF 
     | PREVIOUS WORD	    | NAME      |     	                   |            | INSTRUCTIONS
-    +--- Integer -------+- Integer -+- n Integers as - - - - - +- Integer --+------------- - - - -
+    +--- Integer 32 ----+- Integer -+- n Integers as - - - - - +- Integer --+------------- - - - -
                                ^         Unicode Points
                      next pointer points here
                      
 Pretty much everything here is heavily inspired by JonesForth
 
+Words:
 **create word stringliteral literal [lit] lit branch? branch xor or and not swap dup * - + set read ] [ immediate stack>mem return print memposition seerawmem seemem seestack**
 
+Type `profanity` in the terminal to enable aggression upon entering invalid words. I'm not responsible if you get offended over a feature you enabled yourself
+
 ### Code Info
-Interpreter2.java is the actual code. I'll make an effort to comment it up soon.
+`Interpreter.java` is the actual code. I'll make an effort to comment it up soon.
 
-`start.f` is the Forth code read by the interpreter on startup when `exec` is provided with a Scanner initialized to the file
+`start.f` is the Forth code executed when the interpreter starts. It defines control flow and other words from primitives
 
-Interpreter.java is an older iteration of the interpreter. You can see that I'm over reliant on the Java type system and implement words directly in Java without understanding compiling words or memory. I suspect this is a common issue for all C-derivative programmers doing low-level for the first time. But what a learning experience this was!
+`OldInterpreter.java` is an older iteration of the interpreter. You can see that I'm over reliant on the Java type system and implement words directly in Java without understanding compiling words or memory. I suspect this is a common issue for all C-derivative programmers doing low-level for the first time. But what a learning experience this was!
 
 There is an even earlier iteration that I made impulsively in the dark of night -- an even more naive python interpreter with words like IF that worked by scanning the source file for THEN . . .
 

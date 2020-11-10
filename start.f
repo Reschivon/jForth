@@ -81,3 +81,8 @@ lit 1 iftest
 
 whiletest
 
+: tryimm
+    here read
+    here +
+    [lit] 1 set
+;
