@@ -126,7 +126,7 @@ public class Interpreter {
         s.close();
     }
     static void inputLoop(String file){
-        File f = new File(System.getProperty("user.dir") + "/src/forth/"+file);
+        File f = new File(System.getProperty("user.dir") +file);
         if(!f.exists()) return;
 
         System.out.println("Startup file " + file + " found");
@@ -142,7 +142,7 @@ public class Interpreter {
     }
 
     public static void main(String[] args) {
-        inputLoop("start.f");
+        //inputLoop("start.f");
 
         inputLoop();
     }

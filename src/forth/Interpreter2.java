@@ -120,7 +120,7 @@ public class Interpreter2 {
         memory.add(search_word("return"));
 
         try (Scanner scan = new Scanner(new File(
-                System.getProperty("user.dir") + "/src/forth/start.f"))){
+                System.getProperty("user.dir") + "/start.f"))){
 
             System.out.println("Startup file found");
             exec(scan);
@@ -201,7 +201,6 @@ public class Interpreter2 {
 
                             stack.pop();
                         }
-                        case "alloc" -> {for(int i=0;i<stack.pop();i++)memory.add(0);}
                     }
                 } else {
                     //execute forth word
