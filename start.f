@@ -91,6 +91,30 @@
         =
     until
     drop
+; immediate
+
+: constant
+    create
+    stringliteral
+    [lit] 0 stack>mem
+
+    postpone literal
+    stack>mem
+    postpone return
+;
+
+: variable
+    memposition         ( push address of memory to stack )
+    swap
+    memposition set     ( append top of stack to memory )
+
+    create              ( set up a new word )
+    stringliteral
+    [lit] 0 stack>mem
+
+    postpone literal    ( add literal instruction to variable definition )
+    stack>mem           ( append pointer to memory )
+    postpone return     ( add return instruction to variable definition )
 ;
 
 : iftest if [lit] 22 print else [lit] 11 print then ;
@@ -119,3 +143,13 @@ lit 22 print ( lit 55 print ) lit 11 print
 ( commentation! ) ( exciting! )
 
 ( cannot nest parentheses )
+
+lit 22 constant burgers
+burgers print
+
+lit 11 variable pies
+pies read print
+
+lit 22 pies set
+pies read print
+

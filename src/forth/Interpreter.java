@@ -181,7 +181,11 @@ public class Interpreter {
                         case "memposition" -> stack.add(memory.size());
                         case "create" -> {memory.add(HERE); HERE = memory.size();}
                         case "read" -> stack.add(memory.get(stack.pop()));
-                        case "set" -> memory.set(stack.pop(), stack.pop()); //so value, address <-- top of stack
+                        case "set" -> { //value, address <-- top of stack
+                            int address = stack.pop();
+                            if(address == memory.size()) memory.add(stack.pop());
+                            else memory.set(address, stack.pop());
+                        }
                         case "+" -> stack.add(stack.pop() + stack.pop());
                         case "=" -> {
                             stack.add(stack.pop() == stack.pop()? 1:0);
