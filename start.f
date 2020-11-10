@@ -6,7 +6,9 @@
     set
 ;
 
-: [compile] word stack>mem ; immediate
+: [compile]
+    word stack>mem
+; immediate
 
 : words seemem ;
 
@@ -16,13 +18,21 @@
 
 : token>stack ll stack>mem word stack>mem ; immediate
 
+: postpone
+    [compile] token>stack
+    token>stack stack>mem stack>mem
+; immediate
+
 : if
     token>stack branch? stack>mem
     memposition
     [lit] 0 stack>mem
 ; immediate
 
-: unless token>stack not stack>mem [compile] if ; immediate
+: unless
+    postpone not
+    [compile] if
+; immediate
 
 : then
     dup
@@ -39,7 +49,6 @@
 	memposition swap -
 	swap set
 ; immediate
-
 
 : begin
 	memposition
@@ -72,6 +81,17 @@
 	swap set
 ; immediate
 
+: ) ;
+
+: (
+    [compile] literal [word] ) [ stack>mem ]
+    begin
+        dup
+        word
+        =
+    until
+    drop
+;
 
 : iftest if [lit] 22 print else [lit] 11 print then ;
 
@@ -86,3 +106,16 @@ lit 0 iftest
 lit 1 iftest
 
 whiletest
+
+: trojan-print postpone print ; immediate
+
+: troy [lit] 22 trojan-print [lit] 11 print ;
+
+troy
+
+
+lit 22 print ( lit 55 print ) lit 11 print
+
+( commentation! ) ( exciting! )
+
+( cannot nest parentheses )

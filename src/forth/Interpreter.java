@@ -75,7 +75,6 @@ public class Interpreter {
         declarePrimitive("here");
         declarePrimitive("print");
         declarePrimitive("return", true);
-        //declarePrimitive("immediate");
         declarePrimitive("word");
         declarePrimitive("stack>mem");
         declarePrimitive("[", true);
@@ -87,8 +86,10 @@ public class Interpreter {
         declarePrimitive("+");
         declarePrimitive("-");
         declarePrimitive("*");
+        declarePrimitive("=");
         declarePrimitive("dup");
         declarePrimitive("swap");
+        declarePrimitive("drop");
         declarePrimitive("not");
         declarePrimitive("and");
         declarePrimitive("or");
@@ -160,7 +161,6 @@ public class Interpreter {
                         case "here" -> stack.add(HERE);
                         case "[" -> immediate = true;
                         case "]" -> immediate = false;
-                        //case "immediate" -> set_immediate();
                         case "seestack" -> {
                             for (var tok : stack) System.out.print(tok + " ");
                             System.out.println("<-");
@@ -170,7 +170,7 @@ public class Interpreter {
                         case "stringliteral" -> write_string(scan.next(), memory.size());
                         case "read-string" -> System.out.println(read_string(stack.pop()));
                         case "literal" -> {
-                            call_stack.add(call_stack.pop() + 1);
+                            call_stack.incrementLast();
                             stack.add(memory.get(call_stack.last()));
                         }
                         case "lit" -> stack.add(Integer.valueOf(scan.next()));
@@ -183,6 +183,9 @@ public class Interpreter {
                         case "read" -> stack.add(memory.get(stack.pop()));
                         case "set" -> memory.set(stack.pop(), stack.pop()); //so value, address <-- top of stack
                         case "+" -> stack.add(stack.pop() + stack.pop());
+                        case "=" -> {
+                            stack.add(stack.pop() == stack.pop()? 1:0);
+                        }
                         case "-" -> stack.add(-stack.pop() + stack.pop());
                         case "*" -> stack.add(stack.pop() * stack.pop());
                         case "not" -> stack.add(stack.pop()==0?1:0);
@@ -191,6 +194,7 @@ public class Interpreter {
                         case "xor" -> stack.add(stack.pop() ^ stack.pop());
                         case "swap" -> {int p = stack.pop(); stack.add(stack.size()-1, p);}
                         case "dup" -> stack.add(stack.last());
+                        case "drop" -> stack.remove(stack.size()-1);
                         case "branch" -> //advance pointer by instruction at current pointer position
                                 call_stack.set(call_stack.size()-1, call_stack.last() + memory.get(call_stack.last() + 1));
                         case "branch?" -> {
@@ -290,7 +294,7 @@ public class Interpreter {
             String word_name = read_string(add);
             int immediate = memory.get(add + memory.get(add));
 
-            System.out.format("[%s immediate:%d ", setBoldText + word_name + setPlainText, immediate);
+            System.out.format("[%s %d immediate:%d ", setBoldText + word_name + setPlainText, add, immediate);
 
             // get the names of instructions within word
             int op = add + memory.get(add) + 1;
