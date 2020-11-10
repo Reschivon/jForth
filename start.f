@@ -1,4 +1,10 @@
-: double [lit] 2 print ;
+
+: immediate
+    here read
+    here +
+    [lit] 1 swap
+    set
+;
 
 : [compile] word stack>mem ; immediate
 
@@ -80,9 +86,3 @@ lit 0 iftest
 lit 1 iftest
 
 whiletest
-
-: tryimm
-    here read
-    here +
-    [lit] 1 set
-;

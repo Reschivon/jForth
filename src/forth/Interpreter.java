@@ -62,7 +62,7 @@ public class Interpreter {
     static void declarePrimitive(String name, boolean immediate){
         create(name);
         primitive_words.put(HERE, name);
-        if(immediate) set_immediate();
+        if(immediate) memory.set(addressToOp(HERE), 1);
     }
 
 
@@ -75,7 +75,7 @@ public class Interpreter {
         declarePrimitive("here");
         declarePrimitive("print");
         declarePrimitive("return", true);
-        declarePrimitive("immediate");
+        //declarePrimitive("immediate");
         declarePrimitive("word");
         declarePrimitive("stack>mem");
         declarePrimitive("[", true);
@@ -160,7 +160,7 @@ public class Interpreter {
                         case "here" -> stack.add(HERE);
                         case "[" -> immediate = true;
                         case "]" -> immediate = false;
-                        case "immediate" -> set_immediate();
+                        //case "immediate" -> set_immediate();
                         case "seestack" -> {
                             for (var tok : stack) System.out.print(tok + " ");
                             System.out.println("<-");
@@ -181,7 +181,7 @@ public class Interpreter {
                         case "memposition" -> stack.add(memory.size());
                         case "create" -> {memory.add(HERE); HERE = memory.size();}
                         case "read" -> stack.add(memory.get(stack.pop()));
-                        case "set" -> memory.set(stack.pop(), stack.pop());
+                        case "set" -> memory.set(stack.pop(), stack.pop()); //so value, address <-- top of stack
                         case "+" -> stack.add(stack.pop() + stack.pop());
                         case "-" -> stack.add(-stack.pop() + stack.pop());
                         case "*" -> stack.add(stack.pop() * stack.pop());
@@ -284,7 +284,7 @@ public class Interpreter {
             here = memory.get(here-1);
         }
 
-        for(int i = 0;i<pointers.size();i++){
+        for(int i = pointers.size()-1;i>=0;i--){
             int add = pointers.get(i);
 
             String word_name = read_string(add);

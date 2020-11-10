@@ -34,7 +34,7 @@ Here is the structure of one word in memory
 Pretty much everything here is heavily inspired by JonesForth
 
 Words:
-**create word stringliteral literal [lit] lit branch? branch xor or and not swap dup * - + set read ] [ immediate stack>mem return print memposition seerawmem seemem seestack**
+**create word stringliteral literal [lit] lit branch? branch xor or and not swap dup * - + set read ] [ stack>mem return print memposition seerawmem seemem seestack**
 
 Type `profanity` in the terminal to enable aggression upon entering invalid words. I'm not responsible if you get offended over a feature you enabled yourself
 
@@ -50,9 +50,9 @@ There is an even earlier iteration that I made impulsively in the dark of night 
 
 ## Credits
 - [JonesForth](https://github.com/nornagon/jonesforth/blob/master/jonesforth.f) for the excellent step-by-step commentary of building an interpreter in assembly
-- [eForth](http://www.exemark.com/FORTH/eForthOverviewv5.pdf) for the elegant, minimalistic primitive word set and source code + explanation of high level forth words
+- [eForth](http://www.exemark.com/FORTH/eForthOverviewv5.pdf) source code of high level Forth words derived from 30 or so primitives
 - [StackExchange](https://softwareengineering.stackexchange.com/questions/339283/forth-how-do-create-and-does-work-exactly) article on CREATE and DOES> which got me curious about the Forth interpreter in the first place
-- [Python Interpreter](https://www.openbookproject.net/py4fun/forth/forth.html) A simplified interpreter without the mindfuck of managing pointers. Good starting point before attempting a full-on interpreter.
+- [Python Interpreter](https://www.openbookproject.net/py4fun/forth/forth.html) A simplified interpreter without the mindbending of managing pointers. Good starting point before attempting a full-on interpreter.
 - Wise men from the Silicon Valley Forth Interest Group
 - More wise men from the Forth2020 Users group
 
