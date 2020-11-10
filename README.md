@@ -43,6 +43,8 @@ Type `profanity` in the terminal to enable aggression upon entering invalid word
 
 `start.f` is the Forth code executed when the interpreter starts. It defines control flow and other words from primitives
 
+`test.f` tests to make sure everything is working correctly. Should output alternating `11`s and `22`s
+
 `OldInterpreter.java` is an older iteration of the interpreter. You can see that I'm over reliant on the Java type system and implement words directly in Java without understanding compiling words or memory. I suspect this is a common issue for all C-derivative programmers doing low-level for the first time. But what a learning experience this was!
 
 There is an even earlier iteration that I made impulsively in the dark of night -- an even more naive python interpreter with words like IF that worked by scanning the source file for THEN . . .

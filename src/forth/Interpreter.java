@@ -125,8 +125,13 @@ public class Interpreter {
         memory.add(search_word("donothing"));
         memory.add(search_word("return"));
 
-        try (Scanner scan = new Scanner(new File(System.getProperty("user.dir") + "/start.f"))){
+
+        try (Scanner scan = new Scanner(new File("start.f"))){
             System.out.println("Startup file found");
+            repl(scan);
+        } catch (FileNotFoundException ignored) {}
+
+        try (Scanner scan = new Scanner(new File("test.f"))){
             repl(scan);
         } catch (FileNotFoundException ignored) {}
 
@@ -245,7 +250,7 @@ public class Interpreter {
                 //see if word is valid
                 int address = search_word(nextWord);
                 if(search_word(nextWord) == -1){
-                    System.out.print("word " + nextWord + " not found.");
+                    System.out.print("word " + nextWord + " not found");
                     if(profanity) System.out.print("Try again, you " + Aggressor.getOffensiveSlur());
                     System.out.println();
 
@@ -307,6 +312,9 @@ public class Interpreter {
             for(int j=op; j<nextop; j++){
                 int mem = memory.get(j);
                 String name = read_string(mem);
+                if(name.strip().equals("return")) {
+                    break;
+                }
                 System.out.print(name + " ");
 
                 if(name.strip().equals("literal")) {

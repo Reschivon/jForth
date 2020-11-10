@@ -86,25 +86,25 @@
 : (
     [compile] literal [word] ) [ stack>mem ]
     begin
-        dup
-        word
-        =
+        dup word =
     until
     drop
 ; immediate
 
-: constant
-    create
+( TODO: functionality to nest parentheses )
+
+: constant ( initial_value '' constant_name -- )
+    create              ( set up a new word )
     stringliteral
     [lit] 0 stack>mem
 
-    postpone literal
-    stack>mem
-    postpone return
+    postpone literal    ( add literal instruction to variable definition )
+    stack>mem           ( append initial value to memory )
+    postpone return     ( add return instruction to constant definition )
 ;
 
-: variable
-    memposition         ( push address of memory to stack )
+: variable ( initial_value '' variable_name -- )
+    memposition         ( push memory address to stack )
     swap
     memposition set     ( append top of stack to memory )
 
@@ -116,40 +116,4 @@
     stack>mem           ( append pointer to memory )
     postpone return     ( add return instruction to variable definition )
 ;
-
-: iftest if [lit] 22 print else [lit] 11 print then ;
-
-: whiletest begin [lit] 11 print [lit] 1 until ;
-
-: unlesstest unless [lit] 11 print else [lit] 22 print then ;
-
-lit 0 unlesstest
-lit 1 unlesstest
-
-lit 0 iftest
-lit 1 iftest
-
-whiletest
-
-: trojan-print postpone print ; immediate
-
-: troy [lit] 22 trojan-print [lit] 11 print ;
-
-troy
-
-
-lit 22 print ( lit 55 print ) lit 11 print
-
-( commentation! ) ( exciting! )
-
-( cannot nest parentheses )
-
-lit 22 constant burgers
-burgers print
-
-lit 11 variable pies
-pies read print
-
-lit 22 pies set
-pies read print
 
