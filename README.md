@@ -10,7 +10,8 @@ However with Forth this can be reduced to nil.
 - Wirelessly send Forth commands to interpreter running on robot (no touch!)
 - No need to restart OpMode
 - No need to build -- system maintains state between edits
-To interoperate with the robot's Java code this interpreter must be in Java.
+
+To interoperate with the robot's Java code this interpreter must be written in Java.
 
 ### Interpreter Info
 To imitate the "genuine" experience of making a Forth on bare metal (which is where its elegance really shines) I've forgone the fancy data structures/libraries of Java.
@@ -29,6 +30,8 @@ Here is the structure of one word in memory
                      next pointer points here
                      
 Pretty much everything here is heavily inspired by JonesForth
+
+**; : create word stringliteral literal [lit] lit branch? branch xor or and not swap dup * - + set read ] [ immediate stack>mem return printmemposition seerawmem seemem seestack**
 
 ### Code Info
 Interpreter2.java is the actual code. I'll make an effort to comment it up soon.

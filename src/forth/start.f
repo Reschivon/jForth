@@ -7,6 +7,7 @@
 : [word] word ; immediate
 
 : ll [word] literal [word] literal stack>mem stack>mem ; immediate
+
 : token>stack ll stack>mem word stack>mem ; immediate
 
 : if

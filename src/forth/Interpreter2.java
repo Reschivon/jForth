@@ -96,7 +96,6 @@ public class Interpreter2 {
         declarePrimitive("[lit]", true);
         declarePrimitive("stringliteral");
         declarePrimitive("read-string");
-        declarePrimitive("read-mem");
         declarePrimitive("create");
 
         create(":");
@@ -175,7 +174,6 @@ public class Interpreter2 {
                             memory.add(Integer.valueOf(scan.next()));
                         }
                         case "memposition" -> stack.add(memory.size());
-                        case "read-mem" -> stack.add(memory.get(stack.pop()));
                         case "create" -> {memory.add(HERE); HERE = memory.size();}
                         case "read" -> stack.add(memory.get(stack.pop()));
                         case "set" -> memory.set(stack.pop(), stack.pop());
