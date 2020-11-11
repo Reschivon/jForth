@@ -25,6 +25,8 @@ lit 22 print ( lit 55 print ) lit 11 print
 
 ( cannot nest parentheses )
 
+( You can enable aggressive error messages with the word 'profanity' )
+
 lit 22 constant burgers
 burgers print
 

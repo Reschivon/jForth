@@ -14,7 +14,7 @@ public class OldInterpreter {
     static List<String> mem  = new ArrayList<>();
     //word metadata lookup. Either address in mem or function
     static HashMap<String, Object> names = new HashMap<>();
-    //TODO dirty word immediacy lookup
+    // dirty word immediacy lookup
     static HashSet<String> immediates = new HashSet<>();
 
     //when immediate mode is True, run instantly
@@ -54,9 +54,7 @@ public class OldInterpreter {
         /*names.put("bind:", (Runnable)() -> {
             names.put(nextToken(), data.pop());
         });*/
-        names.put("push", (Runnable)() -> {
-            data.add(nextToken());
-        });
+        names.put("push", (Runnable)() -> data.add(nextToken()));
         names.put(":", (Runnable)() -> {
             data.add(nextToken());
             ((Runnable)names.get("[")).run();
@@ -133,7 +131,7 @@ public class OldInterpreter {
 
         try {
         s = new Scanner(f);
-        } catch (FileNotFoundException e) {}
+        } catch (FileNotFoundException ignored) {}
 
         call.add(0);
         loop();
