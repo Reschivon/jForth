@@ -1,5 +1,3 @@
-package forth;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -12,7 +10,7 @@ public class Aggressor {
     static {
         Scanner scan = null;
         try {
-            scan = new Scanner(new File(System.getProperty("user.dir") + "/src/forth/aggression.txt"));
+            scan = new Scanner(new File(System.getProperty("user.dir") + "/src/aggression.txt"));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

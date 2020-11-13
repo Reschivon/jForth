@@ -3,8 +3,11 @@ A Forth implementation in Java that sticks to the elegance of a bare metal Forth
 
 Also useful as a reference for programmers from higher-level languages learning the in & outs of the Forth interpreter. (If you are brand-new to Forth, [read up](http://galileo.phys.virginia.edu/classes/551.jvn.fall01/primer.htm) on the syntax before getting into the implementation)
 
-Code is by no means pretty. It still has a bunch of rough spots. No comments yet. The primitives can be further reduced
-Todo: make linked list dictionary traversal work with here
+Todo: 
+
+The primitives can be further reduced
+
+make linked list dictionary traversal work with here
 
 ## Motivation
 The need to speed up the development process of FIRST Tech Challenge robotics code. Deploying a single edit requires 20s of build time, manual download thru a cable, repositioning the robot, and restarting the OpMode. 

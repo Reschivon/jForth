@@ -1,7 +1,9 @@
-package forth;
-
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.sql.Ref;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,8 +27,13 @@ public class Interpreter {
 
     //input buffer
     static Scanner scan;
-    // memory
+    // memory. Double array
     static List<Integer> memory = new ArrayList<>();
+    // native java objects, extension of memory (get with negative addresses on stack)
+    static List<Object> objects = new ArrayList<>();
+    // starting point for native java methods and fields
+    static Object nativeRoot = null;
+    public static void setNativeRoot(Object o){nativeRoot = o;}
     // data stack
     static Stack stack = new Stack();
     // call stack for nested execution
@@ -119,8 +126,11 @@ public class Interpreter {
 
     }
 
-    public static void main(String[] args) {
+    static {
         //allow primitive words to be found in dictionary
+        declarePrimitive("/");
+        declarePrimitive("seeobj");
+        declarePrimitive("native");
         declarePrimitive("seestack");
         declarePrimitive("seemem");
         declarePrimitive("seerawmem");
@@ -177,6 +187,10 @@ public class Interpreter {
         ENTRY_POINT = memory.size();
         memory.add(search_word("donothing"));
         memory.add(search_word("return"));
+    }
+
+    public static void main(String[] args) {
+        setNativeRoot(memory);
 
         try
         {   // run file start.f
@@ -228,10 +242,12 @@ public class Interpreter {
 
             // immediate words and immediate mode will cause the current instruction to be executed
             if(immediate || memory.get(addressToFlag(word_address)) == 1 || (call_stack.size()>=2))
-            {   // execute
+            {   // primitive or forth word?
                 if(primitive_words.containsKey(word_address))
                 {   // execute primitive
+                        try {
                     primitive(primitive_words.get(word_address));
+                        } catch (InvocationTargetException e) {e.printStackTrace();} catch (IllegalAccessException e) { e.printStackTrace();}
 
                     if(DEBUG)
                         System.out.print(" r::" + read_string(word_address));
@@ -273,9 +289,10 @@ public class Interpreter {
     /**
      * executes the relevant primitive based on its name
      */
-    static void primitive(String word)
-    {
+    static void primitive(String word) throws InvocationTargetException, IllegalAccessException {
         switch (word) {
+            case "native" -> addObject(nativeRoot);
+            case "/" -> dotOperator();
             case "donothing" -> System.out.print("");
             case "print" -> System.out.println(stack.pop());
             case "return" -> call_stack.remove(call_stack.size() - 1);
@@ -285,7 +302,13 @@ public class Interpreter {
             case "[" -> immediate = true;
             case "]" -> immediate = false;
             case "seestack" -> {
-                for (var tok : stack) System.out.print(tok + " ");
+                for (var tok : stack)
+                    System.out.print(tok + " ");
+                System.out.println("<-");
+            }
+            case "seeobj" -> {
+                for (var tok : objects)
+                    System.out.print(tok.getClass().getName() + " ");
                 System.out.println("<-");
             }
             case "seemem" -> show_mem();
@@ -342,11 +365,66 @@ public class Interpreter {
             case "quit" -> System.exit(0);
         }
     }
+    static void addObject(Object o){
+        objects.add(o);
+        stack.add(-objects.size());
+    }
+    static Object getObject(){
+        return objects.get(-stack.pop()-1);
+    }
+
+    // (caller object '' name of attribute -- return value or address of returned object)
+    static void dotOperator() throws InvocationTargetException, IllegalAccessException {
+        // the calling object
+        Object actor = getObject();
+        // the name of the object's field or method
+        String fieldOrClass = scan.next();
+        // get actual type of attribute
+        Object attribute = ReflectionMachine.getByString(actor, fieldOrClass);
+
+        if (attribute == null) {
+            System.out.println("field or class " + fieldOrClass + " not found as attribute");
+        }
+
+        // call a method and push return to stack
+        else if(attribute instanceof Method){
+            Method themethod = ((Method)attribute);
+
+            // get parameters
+            Object[] params = new Object[themethod.getParameterCount()];
+            for(int i=0; i<params.length;i++){
+                int stackElem = stack.pop();
+                // stack has object address or integer?
+                params[i] = (stackElem < 0)? objects.get(-stackElem+1):stackElem;
+            }
+            // invoke
+            Object returnval = themethod.invoke(actor, params);
+
+            // manage return as object or integer
+            if(returnval instanceof Integer || returnval.getClass() == int.class){
+                stack.add((int)returnval);
+            } else {// is object
+                objects.add(returnval);
+                stack.add(-objects.size());
+            }
+
+        }
+        // get the value of field
+        else if(attribute instanceof Field) {
+            Field thefield = ((Field)attribute);
+            if (thefield.getType() == int.class || thefield.getType() == Integer.class) {
+                stack.add(thefield.getInt(actor));
+            }
+            else {//is object
+                addObject(thefield.get(actor));
+            }
+        }
+    }
 
     /**
      * Take next instruction from input stream and prepare it
      * for execution by placing the relevant opcode in memory
-     * and reinitializing the the call stack
+     * and reinitializing the call stack
      */
     static String nextInstruction()
     {
@@ -368,7 +446,7 @@ public class Interpreter {
         {   // word not found
             System.out.print("word " + next_Word + " not found");
             if(profanity)
-                System.out.print("Try again, you " + Aggressor.getOffensiveSlur());
+                System.out.print(". Try again, you " + Aggressor.getOffensiveSlur());
             System.out.println();
 
             //set empty instruction at ENTRY_POINT
@@ -458,7 +536,7 @@ public class Interpreter {
             var word_name = read_string(word_address);
             var immediate = memory.get(word_address + memory.get(word_address));
 
-            System.out.format("[%s %d immediate:%d ", setBoldText + word_name + setPlainText, word_address, immediate);
+            System.out.format("%-25s %d %s ", setBoldText + word_name + setPlainText, word_address, immediate==1?"immdt":"     ");
 
             // first opcode of the word
             var instruction_address = addressToOp(word_address);
@@ -486,7 +564,7 @@ public class Interpreter {
                     System.out.print(memory.get(j) + " ");
                 }
             }
-            System.out.println("]");
+            System.out.println("");
         }
 
         System.out.println();
@@ -512,4 +590,5 @@ public class Interpreter {
             set(size()-1, val);
         }
     }
+
 }
