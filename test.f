@@ -1,25 +1,25 @@
 
-: iftest if [lit] 22 print else [lit] 11 print then ;
+: iftest if 22 print else 11 print then ;
 
-: whiletest begin [lit] 11 print [lit] 1 until ;
+: whiletest begin 11 print 1 until ;
 
-: unlesstest unless [lit] 11 print else [lit] 22 print then ;
+: unlesstest unless 11 print else 22 print then ;
 
-lit 0 unlesstest
-lit 1 unlesstest
+ 0 unlesstest
+ 1 unlesstest
 
-lit 0 iftest
-lit 1 iftest
+ 0 iftest
+ 1 iftest
 
 whiletest
 
 : trojan-print postpone print ; immediate
 
-: troy [lit] 22 trojan-print [lit] 11 print ;
+: troy 22 trojan-print 11 print ;
 
 troy
 
-lit 22 print ( lit 55 print ) lit 11 print
+ 22 print ( 55 print ) 11 print
 
 ( commentation! ) ( exciting! )
 
@@ -27,11 +27,16 @@ lit 22 print ( lit 55 print ) lit 11 print
 
 ( You can enable aggressive error messages with the word 'profanity' )
 
-lit 22 constant burgers
+ 22 constant burgers
 burgers print
 
-lit 11 variable pies
+ 11 variable pies
 pies read print
 
-lit 22 pies set
+ 22 pies set
 pies read print
+
+new testNative = canvas
+30 30 200 200 new bluerect = rect
+
+rect canvas / addthing

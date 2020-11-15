@@ -21,4 +21,20 @@ public class ReflectionMachine {
         if(f != null) return f;
         return null;
     }
+
+    public static void methods(Object target){
+        Method[] l = target.getClass().getMethods();
+        for(Method f:l){
+            System.out.println(f);
+        }
+        System.out.println();
+    }
+
+    public static void fields(Object target){
+        Field[] l = target.getClass().getFields();
+        for(Field f:l){
+            System.out.println(f);
+        }
+        System.out.println();
+    }
 }

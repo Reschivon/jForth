@@ -1,13 +1,10 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.Ref;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Interpreter {
     public static boolean DEBUG = false;
@@ -128,7 +125,10 @@ public class Interpreter {
 
     static {
         //allow primitive words to be found in dictionary
+        declarePrimitive("new");
         declarePrimitive("/");
+        declarePrimitive("fields");
+        declarePrimitive("methods");
         declarePrimitive("seeobj");
         declarePrimitive("native");
         declarePrimitive("seestack");
@@ -159,8 +159,6 @@ public class Interpreter {
         declarePrimitive("xor");
         declarePrimitive("branch");
         declarePrimitive("branch?");
-        declarePrimitive("lit");
-        declarePrimitive("[lit]", true);
         declarePrimitive("stringliteral");
         declarePrimitive("read-string");
         declarePrimitive("create");
@@ -244,19 +242,21 @@ public class Interpreter {
             if(immediate || memory.get(addressToFlag(word_address)) == 1 || (call_stack.size()>=2))
             {   // primitive or forth word?
                 if(primitive_words.containsKey(word_address))
-                {   // execute primitive
-                        try {
-                    primitive(primitive_words.get(word_address));
-                        } catch (InvocationTargetException e) {e.printStackTrace();} catch (IllegalAccessException e) { e.printStackTrace();}
-
+                {
                     if(DEBUG)
                         System.out.print(" r::" + read_string(word_address));
-                }else{
-                    // execute forth word
-                    call_stack.add(word_address + memory.get(word_address));
 
+                    // execute primitive
+                        try {
+                    primitive(primitive_words.get(word_address));
+                        } catch (InvocationTargetException | ClassNotFoundException | NoSuchMethodException | InstantiationException e) {e.printStackTrace();} catch (IllegalAccessException e) { e.printStackTrace();}
+
+                }else{
                     if(DEBUG)
                         System.out.print(" rf::" + read_string(word_address));
+
+                    // execute forth word
+                    call_stack.add(word_address + memory.get(word_address));
                 }
             }else{
                 if(DEBUG)
@@ -275,7 +275,7 @@ public class Interpreter {
                 if(next_word == null) return;
 
                 if(DEBUG)
-                    System.out.println("Next word: " + next_word);
+                    System.out.println("\nNext word: " + next_word);
 
                 // do not allow the call stack to be incremented since we just reset the call stack
                 continue;
@@ -289,8 +289,11 @@ public class Interpreter {
     /**
      * executes the relevant primitive based on its name
      */
-    static void primitive(String word) throws InvocationTargetException, IllegalAccessException {
+    static void primitive(String word) throws InvocationTargetException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InstantiationException {
         switch (word) {
+            case "fields" -> ReflectionMachine.fields(getObject());
+            case "methods" -> ReflectionMachine.methods(getObject());
+            case "new" -> newOperator();
             case "native" -> addObject(nativeRoot);
             case "/" -> dotOperator();
             case "donothing" -> System.out.print("");
@@ -318,11 +321,6 @@ public class Interpreter {
             case "literal" -> {
                 call_stack.incrementLast();
                 stack.add(memory.get(call_stack.last()));
-            }
-            case "lit" -> stack.add(Integer.valueOf(scan.next()));
-            case "[lit]" -> {
-                memory.add(search_word("literal"));
-                memory.add(Integer.valueOf(scan.next()));
             }
             case "memposition" -> stack.add(memory.size());
             case "create" -> {
@@ -373,6 +371,28 @@ public class Interpreter {
         return objects.get(-stack.pop()-1);
     }
 
+    static void newOperator() throws IllegalAccessException, InvocationTargetException, InstantiationException {
+        String classname = scan.next();
+        Constructor[] constructors;
+            try {
+        constructors = Class.forName(classname).getConstructors();
+            } catch (ClassNotFoundException e){
+        System.out.println(classname + " was not found. Fully qualified names required");
+        return;
+            }
+
+        /*Class[] o = constructors[0].getParameterTypes();
+        for(var i:o){
+            System.out.println(i);
+        }*/
+
+        Object[] params = new Object[constructors[0].getParameterCount()];
+        for(int i=0; i<params.length; i++){
+            params[i] = stack.pop();
+        }
+        addObject(constructors[0].newInstance(params));
+    }
+
     // (caller object '' name of attribute -- return value or address of returned object)
     static void dotOperator() throws InvocationTargetException, IllegalAccessException {
         // the calling object
@@ -392,16 +412,17 @@ public class Interpreter {
 
             // get parameters
             Object[] params = new Object[themethod.getParameterCount()];
+
             for(int i=0; i<params.length;i++){
                 int stackElem = stack.pop();
                 // stack has object address or integer?
-                params[i] = (stackElem < 0)? objects.get(-stackElem+1):stackElem;
+                params[i] = (stackElem < 0)? objects.get(-stackElem-1):stackElem;
             }
             // invoke
             Object returnval = themethod.invoke(actor, params);
 
             // manage return as object or integer
-            if(returnval instanceof Integer || returnval.getClass() == int.class){
+            if(returnval instanceof Integer){
                 stack.add((int)returnval);
             } else {// is object
                 objects.add(returnval);
@@ -432,11 +453,24 @@ public class Interpreter {
         if(!scan.hasNext())
             return null;
 
-        // reset call stack to execute from ENTRY_POINT
-        call_stack.add(ENTRY_POINT);
 
         // get next token from input
         var next_Word = scan.next();
+
+        // if it's a number, then deal with the number and skip to next
+            try{
+        int val = Integer.valueOf(next_Word);
+        if(immediate) {
+            stack.add(val);
+        }else{
+            memory.add(search_word("literal"));
+            memory.add(val);
+        }
+        return nextInstruction();
+            }catch(NumberFormatException e){}
+
+        // reset call stack to execute from ENTRY_POINT
+        call_stack.add(ENTRY_POINT);
 
         // find address of word identified by token
         var address = search_word(next_Word);

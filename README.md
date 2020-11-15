@@ -36,6 +36,9 @@ Here is the structure of one word in memory
                      
 Pretty much everything here is heavily inspired by JonesForth
 
+type `lit` before literals in immediate mode, and `[lit]` before literals in compiler mode. `native` will place the address of 
+the native entrypoint object on the stack (defined in main) of whose fields and methods can be accessed form java code. 
+
 Words:
 **create word stringliteral literal [lit] lit branch? branch xor or and not swap dup * - + set read ] [ stack>mem return print memposition seerawmem seemem seestack**
 

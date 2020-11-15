@@ -2,7 +2,7 @@
 : immediate
     here read
     here +
-    [lit] 1 swap
+    1 swap
     set
 ;
 
@@ -26,7 +26,7 @@
 : if
     token>stack branch? stack>mem
     memposition
-    [lit] 0 stack>mem
+    0 stack>mem
 ; immediate
 
 : unless
@@ -43,7 +43,7 @@
 : else
 	token>stack branch stack>mem
 	memposition
-	[lit] 0 stack>mem
+	0 stack>mem
 	swap
 	dup
 	memposition swap -
@@ -69,7 +69,7 @@
 : while
 	token>stack branch? stack>mem
 	memposition
-	[lit] 0 stack>mem
+	0 stack>mem
 ; immediate
 
 : repeat
@@ -96,12 +96,13 @@
 : constant ( initial_value '' constant_name -- )
     create              ( set up a new word )
     stringliteral
-    [lit] 0 stack>mem
+    0 stack>mem
 
     postpone literal    ( add literal instruction to variable definition )
     stack>mem           ( append initial value to memory )
     postpone return     ( add return instruction to constant definition )
 ;
+: = constant ; ( just thought it made sense )
 
 : variable ( initial_value '' variable_name -- )
     memposition         ( push memory address to stack )
@@ -110,7 +111,7 @@
 
     create              ( set up a new word )
     stringliteral
-    [lit] 0 stack>mem
+    0 stack>mem
 
     postpone literal    ( add literal instruction to variable definition )
     stack>mem           ( append pointer to memory )
