@@ -9,6 +9,8 @@ The primitives can be further reduced
 
 make linked list dictionary traversal work with here
 
+Early binding for native java words so they can be compiled
+
 ## Motivation
 The need to speed up the development process of FIRST Tech Challenge robotics code. Deploying a single edit requires 20s of build time, manual download thru a cable, repositioning the robot, and restarting the OpMode. 
 However with Forth this can be reduced to nil.
