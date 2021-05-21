@@ -1,3 +1,6 @@
+
+An early exercise in Forth and Java. Since succeded by this much more powerful [version](https://github.com/Reschivon/RemoteJavaForth)
+
 # JForth
 A Forth implementation in Java that sticks to the elegance of a bare metal Forth interpreter as much as possible.
 
